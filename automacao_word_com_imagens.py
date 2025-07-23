@@ -35,15 +35,11 @@ def copy_layout_and_header_footer(template_path, dest_path, output_path):
             template_section = template_doc.sections[i]
             print(f"\nProcessando Seção {i}...")
 
-            # PASSO 1: Copiar propriedades da seção (margens, tamanho, e a configuração de primeira página)
             _copy_section_properties(template_section, dest_section)
 
-            # PASSO 2: Copiar o cabeçalho/rodapé padrão (para páginas 2 em diante)
             _copy_part(template_doc, dest_doc, dest_section, template_section.header, 'default_header', style_pPr_cache)
             _copy_part(template_doc, dest_doc, dest_section, template_section.footer, 'default_footer', style_pPr_cache)
 
-            # PASSO 3: Copiar o cabeçalho/rodapé da primeira página, se a configuração estiver ativa no template
-            # A verificação correta é pela presença do elemento XML 'titlePg'
             if template_section._sectPr.titlePg is not None:
                 print("  - 'Primeira Página Diferente' detectado. Copiando conteúdo específico.")
                 _copy_part(template_doc, dest_doc, dest_section, template_section.first_page_header,
@@ -80,7 +76,6 @@ def _copy_section_properties(source_section, dest_section):
     print("  - Copiando propriedades da seção (margens, tamanho da página, etc.)...")
     source_sectPr = source_section._sectPr
     dest_sectPr = dest_section._sectPr
-    # Adicionado 'titlePg' para copiar a configuração "Primeira Página Diferente"
     tags_to_copy = ['pgSz', 'pgMar', 'cols', 'docGrid', 'titlePg']
 
     for child in list(dest_sectPr):
@@ -126,12 +121,12 @@ def _copy_part(template_doc, dest_doc, dest_section, source_element, part_type, 
         new_child_docx_el = copy.deepcopy(child_element)
 
         if etree.QName(new_child_docx_el).localname == 'p':
-            pPr = new_child_docx_el.find('.//w:pPr', namespaces=nsmap_comprehensive)
+            pPr = new_child_docx_el.find('w:pPr', namespaces=nsmap_comprehensive)
             if pPr is None:
                 pPr = etree.Element(f'{{{nsmap_comprehensive["w"]}}}pPr')
                 new_child_docx_el.insert(0, pPr)
 
-            style_tag = pPr.find('.//w:pStyle', namespaces=nsmap_comprehensive)
+            style_tag = pPr.find('w:pStyle', namespaces=nsmap_comprehensive)
             if style_tag is not None:
                 style_id = style_tag.get(f'{{{nsmap_comprehensive["w"]}}}val')
                 style_pPr = _get_style_pPr(template_doc, style_id, style_cache)
@@ -139,25 +134,23 @@ def _copy_part(template_doc, dest_doc, dest_section, source_element, part_type, 
                 if style_pPr is not None:
                     for style_prop in style_pPr:
                         prop_tag_name = etree.QName(style_prop).localname
-                        if pPr.find(f'.//w:{prop_tag_name}', namespaces=nsmap_comprehensive) is None:
+                        if pPr.find(f'w:{prop_tag_name}', namespaces=nsmap_comprehensive) is None:
                             pPr.insert(0, copy.deepcopy(style_prop))
 
-        child_xml_string = etree.tostring(new_child_docx_el)
-        new_child_lxml_el = etree.fromstring(child_xml_string)
+        child_xml_string = etree.tostring(new_child_docx_el, encoding='unicode')
 
-        for blip_element in new_child_lxml_el.xpath('.//a:blip', namespaces=nsmap_comprehensive):
-            embed_rid = blip_element.get(f'{{{nsmap_comprehensive["r"]}}}embed')
-            if embed_rid in rid_map:
-                blip_element.set(f'{{{nsmap_comprehensive["r"]}}}embed', rid_map[embed_rid])
+        for old_rid, new_rid in rid_map.items():
+            child_xml_string = child_xml_string.replace(f'r:embed="{old_rid}"', f'r:embed="{new_rid}"')
 
-        dest_xml_element.append(new_child_lxml_el)
+        final_lxml_el = etree.fromstring(child_xml_string)
+        dest_xml_element.append(final_lxml_el)
 
 
 # --- Função Principal ---
 if __name__ == "__main__":
-    TEMPLATE_FILE = "header2.docx"
-    DEST_FILE = "original2.docx"
-    OUTPUT_FILE = "resultado2.docx"
+    TEMPLATE_FILE = "header1.docx"
+    DEST_FILE = "original1.docx"
+    OUTPUT_FILE = "resultado1.docx"
 
     # apagar arquivo destino
     if os.path.exists(OUTPUT_FILE):
