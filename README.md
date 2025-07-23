@@ -54,10 +54,10 @@ Siga os passos abaixo para preparar e executar o script:
     Abra o terminal, navegue até a pasta onde você salvou o script e os documentos Word, e execute o comando:
 
     ```bash
-    python3 automacao_word_com_imagens.py
+    python3 main.py
     ```
 
-4.  **Verifique o Resultado:**
+3.  **Verifique o Resultado:**
     Após a execução, um novo arquivo chamado `3-destino_com_cab_e_rod.docx` será criado na mesma pasta.
     
 ## Notas Importantes e Limitações
@@ -66,5 +66,6 @@ Siga os passos abaixo para preparar e executar o script:
   * **Substituição vs. Fusão:** O script *substituir* o conteúdo dos cabeçalhos e rodapés padrão (`header1.xml` e `footer1.xml`) do documento de destino pelo conteúdo do template. Se o seu caso de uso exigir a fusão ou combinação de conteúdo existente com o do template, a lógica seria mais complexa.
   * **Formatação de Header e Footer:** Cópia de configuração de formatação de régua e tabulação.
   * **Tratamento de Configuração de Primeira Página:** Tratamento diferenciado para entender e copiar a configuração de header e footer da primeira página.
+  * **MVC Architecture:** Projeto utilizando arquitetura MVC, com pouca carga intrisseca e aplicação de conceitos de SOLID e clean code.
 
 -----
