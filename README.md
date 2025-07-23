@@ -59,10 +59,12 @@ Siga os passos abaixo para preparar e executar o script:
 
 4.  **Verifique o Resultado:**
     Após a execução, um novo arquivo chamado `3-destino_com_cab_e_rod.docx` será criado na mesma pasta.
-
+    
 ## Notas Importantes e Limitações
-???
+
   * **Fidelidade de Formatação:** A grande força deste script é sua capacidade de preservar a formatação. Ao copiar diretamente os nós XML de parágrafos (<w:p>) e tabelas (<w:tbl>), ele mantém com sucesso propriedades como alinhamento, espaçamento, fontes e cores definidas no template.
   * **Substituição vs. Fusão:** O script *substituir* o conteúdo dos cabeçalhos e rodapés padrão (`header1.xml` e `footer1.xml`) do documento de destino pelo conteúdo do template. Se o seu caso de uso exigir a fusão ou combinação de conteúdo existente com o do template, a lógica seria mais complexa.
+  * **Formatação de Header e Footer:** Cópia de configuração de formatação de régua e tabulação.
+  * **Tratamento de Configuração de Primeira Página:** Tratamento diferenciado para entender e copiar a configuração de header e footer da primeira página.
 
 -----
