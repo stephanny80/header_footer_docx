@@ -66,6 +66,6 @@ Siga os passos abaixo para preparar e executar o script:
   * **Substituição vs. Fusão:** O script *substituir* o conteúdo dos cabeçalhos e rodapés padrão (`header1.xml` e `footer1.xml`) do documento de destino pelo conteúdo do template. Se o seu caso de uso exigir a fusão ou combinação de conteúdo existente com o do template, a lógica seria mais complexa.
   * **Formatação de Header e Footer:** Cópia de configuração de formatação de régua e tabulação.
   * **Tratamento de Configuração de Primeira Página:** Tratamento diferenciado para entender e copiar a configuração de header e footer da primeira página.
-  * **MVN Architecture:** Projeto utilizando arquitetura MVC, com pouca carga intrisseca e aplicação de conceitos de SOLID e clean code.
+  * **MVC Architecture:** Projeto utilizando arquitetura MVC, com pouca carga intrisseca e aplicação de conceitos de SOLID e clean code.
 
 -----
