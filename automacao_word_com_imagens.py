@@ -35,11 +35,15 @@ def copy_layout_and_header_footer(template_path, dest_path, output_path):
             template_section = template_doc.sections[i]
             print(f"\nProcessando Seção {i}...")
 
+            # Copiar propriedades da seção (margens, tamanho, e a configuração de primeira página)
             _copy_section_properties(template_section, dest_section)
 
+            # Copiar o cabeçalho/rodapé padrão (para páginas 2 em diante)
             _copy_part(template_doc, dest_doc, dest_section, template_section.header, 'default_header', style_pPr_cache)
             _copy_part(template_doc, dest_doc, dest_section, template_section.footer, 'default_footer', style_pPr_cache)
 
+            # Copiar o cabeçalho/rodapé da primeira página, se a configuração estiver ativa no template
+            # A verificação correta é pela presença do elemento XML 'titlePg'
             if template_section._sectPr.titlePg is not None:
                 print("  - 'Primeira Página Diferente' detectado. Copiando conteúdo específico.")
                 _copy_part(template_doc, dest_doc, dest_section, template_section.first_page_header,
@@ -76,6 +80,7 @@ def _copy_section_properties(source_section, dest_section):
     print("  - Copiando propriedades da seção (margens, tamanho da página, etc.)...")
     source_sectPr = source_section._sectPr
     dest_sectPr = dest_section._sectPr
+    # Adicionado 'titlePg' para copiar a configuração "Primeira Página Diferente"
     tags_to_copy = ['pgSz', 'pgMar', 'cols', 'docGrid', 'titlePg']
 
     for child in list(dest_sectPr):
@@ -106,18 +111,23 @@ def _copy_part(template_doc, dest_doc, dest_section, source_element, part_type, 
     else:
         return
 
+    # 1. Obter as partes de origem e destino
     source_part = source_element.part
     dest_part = dest_element.part
 
+    # 2. Copiar relações de imagem e criar o mapa de rIds, necessário para levar as informações da imagem
     rid_map = {}
     for rel in source_part.rels.values():
         if "image" in rel.target_ref:
             rid_map[rel.rId] = dest_part.relate_to(rel.target_part, rel.reltype)
 
+    # 3. Limpar o conteúdo do elemento de destino
     dest_xml_element = dest_element._element
     dest_xml_element.clear()
 
+    # 4. Copiar os filhos (parágrafos, tabelas) do elemento de origem para o de destino
     for child_element in source_element._element:
+        # Cria uma cópia do elemento filho (ex: um parágrafo <w:p>)
         new_child_docx_el = copy.deepcopy(child_element)
 
         if etree.QName(new_child_docx_el).localname == 'p':
@@ -137,12 +147,17 @@ def _copy_part(template_doc, dest_doc, dest_section, source_element, part_type, 
                         if pPr.find(f'w:{prop_tag_name}', namespaces=nsmap_comprehensive) is None:
                             pPr.insert(0, copy.deepcopy(style_prop))
 
+        # Cria uma cópia do elemento filho
         child_xml_string = etree.tostring(new_child_docx_el, encoding='unicode')
 
+        # Substitui os rIds das imagens na string XML deste filho
         for old_rid, new_rid in rid_map.items():
             child_xml_string = child_xml_string.replace(f'r:embed="{old_rid}"', f'r:embed="{new_rid}"')
 
+        # Converte a string de volta para um elemento XML
         final_lxml_el = etree.fromstring(child_xml_string)
+
+        # Anexa o novo filho (com rIds corrigidos) ao elemento de destino
         dest_xml_element.append(final_lxml_el)
 
 
