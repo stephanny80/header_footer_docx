@@ -57,7 +57,15 @@ class DocxSynchronizer:
             })
 
         for part_name, (source_el, dest_el) in parts_to_copy.items():
-            copier = PartCopier(source_el, dest_el, self.style_handler, self._NSMAP, part_name, self.view)
+            copier = PartCopier(
+                source_element=source_el,
+                dest_element=dest_el,
+                dest_doc_part=self.dest_doc.part,
+                style_handler=self.style_handler,
+                nsmap=self._NSMAP,
+                part_name=part_name,
+                view=self.view
+            )
             copier.copy_content()
 
     def save(self, output_path: str):
